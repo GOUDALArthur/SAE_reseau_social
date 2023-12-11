@@ -1,13 +1,16 @@
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BDServeur {
 
     private static Map<String, Utilisateur> utilisateurs;
     private static Map<Integer, Message> messages;
-    private static Map<String, List<Utilisateur>> followers;
-    private static Map<String, List<Utilisateur>> follows;
+    private static Map<String, Set<String>> followers;
+    private static Map<String, Set<String>> follows;
 
     private BDServeur() {}
 
@@ -33,11 +36,11 @@ public class BDServeur {
         return BDServeur.messages;
     }
 
-    public static Map<String, List<Utilisateur>> getFollowers() {
+    public static Map<String, Set<String>> getFollowers() {
         return BDServeur.followers;
     }
 
-    public static Map<String, List<Utilisateur>> getFollows() {
+    public static Map<String, Set<String>> getFollows() {
         return BDServeur.follows;
     }
 
@@ -55,8 +58,13 @@ public class BDServeur {
         throw new MessageNotFoundException("Le message " + id + " n'existe pas");
     }
 
+
     public static void addUtilisateur(String pseudo) {
         BDServeur.utilisateurs.put(pseudo, new Utilisateur(pseudo));
+    }
+
+    public static void delUtilisateur(String pseudo) {
+        BDServeur.utilisateurs.remove(pseudo);
     }
 
     public static void addMessage(String contenu, Utilisateur auteur) {
@@ -64,7 +72,34 @@ public class BDServeur {
         BDServeur.messages.put(newMessage.getId(), newMessage);
     }
 
-    public static void addFollower(String follower, String follow) {
+    public static void delMessage(int id) {
+        BDServeur.messages.remove(id);
+    }
+
+    public static void addFollower(String followed, String follower) {
+        // Ajout dans la liste des followers
+        if (BDServeur.followers.containsKey(followed)) {
+            BDServeur.followers.put(followed, new HashSet<>());
+        }
+        BDServeur.followers.get(followed).add(follower);
+
+        // Ajout dans la liste des follows
+        if (BDServeur.follows.containsKey(follower)) {
+            BDServeur.follows.put(follower, new HashSet<>());
+        }
+        BDServeur.follows.get(follower).add(followed);
+    }
+
+    public static void delFollower(String followed, String follower) {
+        // Suppression dans la liste des followers
+        if (BDServeur.followers.containsKey(followed)) {
+            BDServeur.followers.get(followed).remove(follower);
+        }
+
+        // Suppression dans la liste des follows
+        if (BDServeur.follows.containsKey(follower)) {
+            BDServeur.follows.get(follower).remove(followed);
+        }
     }
 
 }
