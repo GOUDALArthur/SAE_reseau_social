@@ -57,26 +57,12 @@ public class Utilisateur {
     }
 
 
-    public void follow(String nomUtil) {
-        try {
-            Utilisateur newFollow = BDServeur.getUtilisateur(nomUtil);
-            newFollow.addFollower(this);
-            
-        }
-        catch (UtilisateurNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
+    public void follow(String newFollow) {
+        BDServeur.addFollower(newFollow, this.pseudo);
     }
 
-    public void unfollow(String nomUtil) {
-        try {
-            Utilisateur newUnfollow = BDServeur.getUtilisateur(nomUtil);
-            newUnfollow.delFollower(this);
-            this.following.remove(newUnfollow);
-        }
-        catch (UtilisateurNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
+    public void unfollow(String nomFollow) {
+        BDServeur.delFollower(nomFollow, this.pseudo);
     }
 
     public void like(int idMessage) {
