@@ -108,15 +108,4 @@ public class Utilisateur {
         }
     }
 
-
-    public void addFollower(Utilisateur utilisateur) {
-        this.followers.add(utilisateur);
-        this.nbFollowers++;
-    }
-
-    public void delFollower(Utilisateur utilisateur) {
-        this.followers.remove(utilisateur);
-        this.nbFollowers--;
-    }
-
 }

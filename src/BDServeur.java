@@ -6,13 +6,17 @@ public class BDServeur {
 
     private static Map<String, Utilisateur> utilisateurs;
     private static Map<Integer, Message> messages;
-    private static Map<String, List<String>> followers;
-    private static Map<String, List<String>> follows;
+    private static Map<String, List<Utilisateur>> followers;
+    private static Map<String, List<Utilisateur>> follows;
 
     private BDServeur() {}
 
 
     public static void load() {
+        BDServeur.utilisateurs = new HashMap<>();
+        BDServeur.messages = new HashMap<>();
+        BDServeur.followers = new HashMap<>();
+        BDServeur.follows = new HashMap<>();
         //TODO : charger les utilisateurs et les messages depuis un fichier JSON
     }
 
@@ -29,11 +33,11 @@ public class BDServeur {
         return BDServeur.messages;
     }
 
-    public static Map<String, List<String>> getFollowers() {
+    public static Map<String, List<Utilisateur>> getFollowers() {
         return BDServeur.followers;
     }
 
-    public static Map<String, List<String>> getFollows() {
+    public static Map<String, List<Utilisateur>> getFollows() {
         return BDServeur.follows;
     }
 
@@ -61,8 +65,6 @@ public class BDServeur {
     }
 
     public static void addFollower(String follower, String follow) {
-        BDServeur.followers.get(follow).add(follower);
-        BDServeur.follows.get(follower).add(follow);
     }
 
 }
