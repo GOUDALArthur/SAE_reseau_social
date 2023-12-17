@@ -17,10 +17,11 @@ public class Serveur {
                 System.out.println("Connexion d'un client");
                 String pseudo = authentifieClient(socketClient);
 
-                Utilisateur utilisateur = BDServeur.getUtilisateur(pseudo);
-                utilisateur.setSocket(socketClient);
-                utilisateur.connexion();
-                System.out.println("Connexion de " + pseudo + " réussie");
+                
+                
+                for (Utilisateur util : BDServeur.getUtilisateurs().values()) {
+                    System.out.print(util.getPseudo() + ", ");
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -33,22 +34,22 @@ public class Serveur {
         PrintWriter writer = new PrintWriter(socketClient.getOutputStream(), true);
         
         writer.println("Entrer votre nom d'utilisateur : ");
-        System.out.println("Attente du nom d'utilisateur...");
         String pseudo = reader.readLine();
-        System.out.println("Nom d'utilisateur reçu : " + pseudo);
         System.out.println("Authentification de " + pseudo + " en cours");
         Utilisateur utilisateur = BDServeur.getUtilisateur(pseudo);
 
         if (utilisateur == null) {
+            writer.println("inexistant");
             writer.println("Compte inexistant\nVoulez-vous créer un compte ? (O/N) ");
-            String reponse = reader.readLine();
-            System.out.println("Réponse du client : " + reponse);
             if (reader.readLine().equals("O")) {
+                System.out.println("Création du compte de " + pseudo);
                 BDServeur.addUtilisateur(pseudo);
             } else {
+                writer.println("echec");
                 return null;
             }
         }
+        writer.println("reussite");
         return pseudo;
     }
 

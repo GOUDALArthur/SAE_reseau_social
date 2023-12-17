@@ -11,14 +11,25 @@ public class Client {
         try (Socket socket = new Socket(Client.IP_SERVEUR, Client.PORT_SERVEUR)) {
             System.out.println("Connexion au serveur " + IP_SERVEUR + " sur le port " + PORT_SERVEUR);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter writer = new PrintWriter(socket.getOutputStream());
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             Scanner scanner = new Scanner(System.in);
 
             System.out.println(reader.readLine());
             String pseudo = scanner.nextLine();
-            System.out.println("Envoie du nom " + pseudo);
             writer.println(pseudo);
-            writer.flush();
+            
+            String reponseServeur = reader.readLine();
+            if (reponseServeur.equals("inexistant")) {
+                System.out.println(reader.readLine() + "\n" + reader.readLine());
+                writer.println(scanner.nextLine());
+            }
+            reponseServeur = reader.readLine();
+            if (reponseServeur.equals("reussite")) {
+                Utilisateur utilisateur = BDServeur.getUtilisateur(pseudo);
+                utilisateur.setSocket(socket);
+                utilisateur.connexion();
+                new Thread(BDServeur.getUtilisateur(pseudo)).start();
+            }
 
             String message = reader.readLine();
             while (message != null) {

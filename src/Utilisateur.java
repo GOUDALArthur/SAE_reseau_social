@@ -125,13 +125,10 @@ public class Utilisateur implements Runnable {
             this.reader = tempoReader;
             this.writer = tempoWriter;
 
-            writer.println("Bienvenue, " + this.pseudo + " ! On est encore en test mais tkt ça arrive fort !"); writer.flush();
+            System.out.println("Bienvenue, " + this.pseudo + " ! On est encore en test mais tkt ça arrive fort !");
 
-            System.out.print("Envoyer un message : ");
             String message = this.reader.readLine();
             while (message != null) {
-                this.envoieMessage(message);
-                System.out.print("Envoyer un message : ");
                 message = this.reader.readLine();
             }
             

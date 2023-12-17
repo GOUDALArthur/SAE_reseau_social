@@ -43,7 +43,9 @@ public class BDServeur {
     }
 
     public static Utilisateur getUtilisateur(String pseudo) {
-        if (BDServeur.utilisateurs.get(pseudo) != null) {
+        System.out.println("getUtilisateur : " + pseudo);
+        if (BDServeur.utilisateurs.containsKey(pseudo)) {
+            System.out.println("getUtilisateur : " + pseudo + " existe");
             return BDServeur.utilisateurs.get(pseudo);
         }
         return null;
