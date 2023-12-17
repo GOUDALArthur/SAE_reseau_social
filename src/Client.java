@@ -18,6 +18,7 @@ public class Client {
             String pseudo = scanner.nextLine();
             System.out.println("Envoie du nom " + pseudo);
             writer.println(pseudo);
+            writer.flush();
 
             String message = reader.readLine();
             while (message != null) {
