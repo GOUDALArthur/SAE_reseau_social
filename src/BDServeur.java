@@ -1,9 +1,7 @@
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BDServeur {
 
@@ -16,10 +14,10 @@ public class BDServeur {
 
 
     public static void load() {
-        BDServeur.utilisateurs = new HashMap<>();
-        BDServeur.messages = new HashMap<>();
-        BDServeur.followers = new HashMap<>();
-        BDServeur.follows = new HashMap<>();
+        BDServeur.utilisateurs = new ConcurrentHashMap<>();
+        BDServeur.messages = new ConcurrentHashMap<>();
+        BDServeur.followers = new ConcurrentHashMap<>();
+        BDServeur.follows = new ConcurrentHashMap<>();
         //TODO : charger les utilisateurs et les messages depuis un fichier JSON
     }
 
@@ -44,18 +42,18 @@ public class BDServeur {
         return BDServeur.follows;
     }
 
-    public static Utilisateur getUtilisateur(String nomUtil) throws UtilisateurNotFoundException {
-        if (BDServeur.utilisateurs.get(nomUtil) != null) {
-            return BDServeur.utilisateurs.get(nomUtil);
+    public static Utilisateur getUtilisateur(String pseudo) {
+        if (BDServeur.utilisateurs.get(pseudo) != null) {
+            return BDServeur.utilisateurs.get(pseudo);
         }
-        throw new UtilisateurNotFoundException("L'utilisateur " + nomUtil + " n'existe pas");
+        return null;
     }
 
-    public static Message getMessage(int id) throws MessageNotFoundException {
+    public static Message getMessage(int id) {
         if (BDServeur.messages.get(id) != null) {
             return BDServeur.messages.get(id);
         }
-        throw new MessageNotFoundException("Le message " + id + " n'existe pas");
+        return null;
     }
 
 

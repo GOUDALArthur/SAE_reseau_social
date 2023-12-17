@@ -1,14 +1,22 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Utilisateur {
+public class Utilisateur implements Runnable {
 
     private String pseudo;
-    private boolean estConnecte;
     private List<Message> messages;
     private int nbFollowers;
     private int nbFollowing;
-    private String ip;
+
+    private Socket socketClient;
+    private boolean estConnecte;
+    private BufferedReader reader;
+    private PrintWriter writer;
 
 
     public Utilisateur(String pseudo) {
@@ -16,6 +24,16 @@ public class Utilisateur {
         this.estConnecte = false;
         this.messages = new ArrayList<>();
         this.nbFollowers = 0;
+    }
+
+    public void setSocket(Socket socketClient) {
+        this.socketClient = socketClient;
+        try {
+            reader = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
+            writer = new PrintWriter(socketClient.getOutputStream(), true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -39,17 +57,12 @@ public class Utilisateur {
         return this.nbFollowing;
     }
 
-    public String getIp() {
-        return this.ip;
-    }
-
     public void setPseudo(String pseudo) {
         this.pseudo = pseudo;
     }
 
-    public void connexion(String ip) {
+    public void connexion() {
         this.estConnecte = true;
-        this.ip = ip;
     }
 
     public void deconnexion() {
@@ -66,31 +79,76 @@ public class Utilisateur {
     }
 
     public void like(int idMessage) {
-        try {
-            BDServeur.getMessage(idMessage).addLike(this);
+        Message message = BDServeur.getMessage(idMessage);
+        if (message != null) {
+            message.addLike(this);
         }
-        catch (MessageNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
+        else { System.out.println("Message inexistant : " + idMessage); }
     }
 
     public void dislike(int idMessage) {
-        try {
-            BDServeur.getMessage(idMessage).delLike(this);
+        Message message = BDServeur.getMessage(idMessage);
+        if (message != null) {
+            message.delLike(this);
         }
-        catch (MessageNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
+        else { System.out.println("Message inexistant : " + idMessage); }
     }
 
     public void deleteMessage(int idMessage) {
-        try {
-            Message message = BDServeur.getMessage(idMessage);
-            this.messages.remove(message);
-            BDServeur.getMessages().remove(idMessage);
+        Message message = BDServeur.getMessage(idMessage);
+        if (message != null) {
+            if (message.getAuteur() != this) {
+                System.out.println("Vous n'êtes pas l'auteur de ce message.");
+            }
+            else {
+                this.messages.remove(message);
+                BDServeur.getMessages().remove(idMessage);
+            }
         }
-        catch (MessageNotFoundException e) {
+        else { System.out.println("Message inexistant : " + idMessage); }
+    }
+
+    public void envoieMessage(String message) {
+        if (this.writer != null) {
+            BDServeur.addMessage(message, this);
+            this.writer.println(message);
+        }
+    }
+
+
+    @Override
+    public void run() {
+        try (
+            BufferedReader tempoReader = new BufferedReader(new InputStreamReader(this.socketClient.getInputStream()));
+            PrintWriter tempoWriter = new PrintWriter(this.socketClient.getOutputStream());
+        )  {
+            this.reader = tempoReader;
+            this.writer = tempoWriter;
+
+            writer.println("Bienvenue, " + this.pseudo + " ! On est encore en test mais tkt ça arrive fort !"); writer.flush();
+
+            System.out.print("Envoyer un message : ");
+            String message = this.reader.readLine();
+            while (message != null) {
+                this.envoieMessage(message);
+                System.out.print("Envoyer un message : ");
+                message = this.reader.readLine();
+            }
+            
+        } catch (IOException e) {
+            e.printStackTrace();
             System.out.println(e.getMessage());
+        } finally {
+            try {
+                this.reader.close();
+                this.writer.close();
+                this.socketClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println(e.getMessage());
+            } finally {
+                this.deconnexion();
+            }
         }
     }
 
