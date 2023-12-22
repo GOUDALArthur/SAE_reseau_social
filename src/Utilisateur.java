@@ -5,18 +5,15 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
-public class Utilisateur implements Runnable {
+public class Utilisateur {
 
     private String pseudo;
     private List<Message> messages;
     private int nbFollowers;
     private int nbFollowing;
-
-    private Socket socketClient;
     private boolean estConnecte;
-    private BufferedReader reader;
-    private PrintWriter writer;
 
 
     public Utilisateur(String pseudo) {
@@ -24,16 +21,6 @@ public class Utilisateur implements Runnable {
         this.estConnecte = false;
         this.messages = new ArrayList<>();
         this.nbFollowers = 0;
-    }
-
-    public void setSocket(Socket socketClient) {
-        this.socketClient = socketClient;
-        try {
-            reader = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
-            writer = new PrintWriter(socketClient.getOutputStream(), true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 
@@ -109,47 +96,6 @@ public class Utilisateur implements Runnable {
     }
 
     public void envoieMessage(String message) {
-        if (this.writer != null) {
-            BDServeur.addMessage(message, this);
-            this.writer.println(message);
-        }
+        BDServeur.addMessage(message, this);
     }
-
-
-    @Override
-    public void run() {
-        try (
-            BufferedReader tempoReader = new BufferedReader(new InputStreamReader(this.socketClient.getInputStream()));
-            PrintWriter tempoWriter = new PrintWriter(this.socketClient.getOutputStream());
-        )  {
-            this.reader = tempoReader;
-            this.writer = tempoWriter;
-
-            writer.println("Bienvenue, " + this.pseudo + " ! On est encore en test mais tkt ça arrive fort !"); writer.flush();
-
-            System.out.print("Envoyer un message : ");
-            String message = this.reader.readLine();
-            while (message != null) {
-                this.envoieMessage(message);
-                System.out.print("Envoyer un message : ");
-                message = this.reader.readLine();
-            }
-            
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-        } finally {
-            try {
-                this.reader.close();
-                this.writer.close();
-                this.socketClient.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.out.println(e.getMessage());
-            } finally {
-                this.deconnexion();
-            }
-        }
-    }
-
 }

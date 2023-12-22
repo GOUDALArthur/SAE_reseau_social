@@ -15,17 +15,27 @@ public class Serveur {
             while (true) {
                 Socket socketClient = socketServer.accept();
                 System.out.println("Connexion d'un client");
-                String pseudo = authentifieClient(socketClient);
-
-                Utilisateur utilisateur = BDServeur.getUtilisateur(pseudo);
-                utilisateur.setSocket(socketClient);
-                utilisateur.connexion();
-                System.out.println("Connexion de " + pseudo + " réussie");
+                //String pseudo = authentifieClient(socketClient);
+                String pseudo = demandePseudo(socketClient);
+                Utilisateur util = new Utilisateur(pseudo);
+                ClientHandler clientHandler = new ClientHandler(socketClient, util);
+                new Thread(clientHandler).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
+    }
+
+    private static String demandePseudo(Socket socketClient) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
+        PrintWriter writer = new PrintWriter(socketClient.getOutputStream(), true);
+        
+        writer.println("Entrer votre nom d'utilisateur : ");
+        System.out.println("Attente du nom d'utilisateur...");
+        String pseudo = reader.readLine();
+        System.out.println("Nom d'utilisateur reçu : " + pseudo);
+        return pseudo;
     }
 
     private static String authentifieClient(Socket socketClient) throws IOException {

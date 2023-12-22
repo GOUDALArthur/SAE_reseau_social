@@ -16,13 +16,15 @@ public class Client {
 
             System.out.println(reader.readLine());
             String pseudo = scanner.nextLine();
-            System.out.println("Envoie du nom " + pseudo);
-            writer.println(pseudo);
+            writer.println(pseudo); writer.flush();
+            // Authentification --> Serveur.authentifieClient()
 
-            String message = reader.readLine();
+            System.out.print("Envoyer un message : ");
+            String message = scanner.nextLine();
             while (message != null) {
-                System.out.println(message);
-                message = reader.readLine();
+                writer.println(message); writer.flush();
+                System.out.print("Envoyer un message : ");
+                message = scanner.nextLine();
             }
             scanner.close();
         } catch (IOException e) {
