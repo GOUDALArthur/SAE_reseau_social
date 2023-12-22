@@ -11,7 +11,7 @@ public class Client {
         try (Socket socket = new Socket(Client.IP_SERVEUR, Client.PORT_SERVEUR)) {
             System.out.println("Connexion au serveur " + IP_SERVEUR + " sur le port " + PORT_SERVEUR);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter writer = new PrintWriter(socket.getOutputStream());
+            PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
             Scanner scanner = new Scanner(System.in);
 
             System.out.println(reader.readLine());

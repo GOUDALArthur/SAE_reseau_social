@@ -38,7 +38,7 @@ public class Serveur {
         return pseudo;
     }
 
-    private static String authentifieClient(Socket socketClient) throws IOException {
+    private static String demandePseudo(Socket socketClient) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
         PrintWriter writer = new PrintWriter(socketClient.getOutputStream(), true);
         
@@ -50,15 +50,17 @@ public class Serveur {
         Utilisateur utilisateur = BDServeur.getUtilisateur(pseudo);
 
         if (utilisateur == null) {
+            writer.println("inexistant");
             writer.println("Compte inexistant\nVoulez-vous créer un compte ? (O/N) ");
-            String reponse = reader.readLine();
-            System.out.println("Réponse du client : " + reponse);
             if (reader.readLine().equals("O")) {
+                System.out.println("Création du compte de " + pseudo);
                 BDServeur.addUtilisateur(pseudo);
             } else {
+                writer.println("echec");
                 return null;
             }
         }
+        writer.println("reussite");
         return pseudo;
     }
 
