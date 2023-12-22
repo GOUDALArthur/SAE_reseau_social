@@ -38,7 +38,7 @@ public class Serveur {
         return pseudo;
     }
 
-    private static String demandePseudo(Socket socketClient) throws IOException {
+    private static String authentifieClient(Socket socketClient) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
         PrintWriter writer = new PrintWriter(socketClient.getOutputStream(), true);
         
