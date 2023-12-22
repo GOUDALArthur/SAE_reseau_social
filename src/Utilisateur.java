@@ -71,15 +71,15 @@ public class Utilisateur implements Runnable {
 
 
     public void follow(String newFollow) {
-        BDServeur.addFollower(newFollow, this.pseudo);
+        Serveur.getBd().addFollower(newFollow, this.pseudo);
     }
 
     public void unfollow(String nomFollow) {
-        BDServeur.delFollower(nomFollow, this.pseudo);
+        Serveur.getBd().delFollower(nomFollow, this.pseudo);
     }
 
     public void like(int idMessage) {
-        Message message = BDServeur.getMessage(idMessage);
+        Message message = Serveur.getBd().getMessage(idMessage);
         if (message != null) {
             message.addLike(this);
         }
@@ -87,7 +87,7 @@ public class Utilisateur implements Runnable {
     }
 
     public void dislike(int idMessage) {
-        Message message = BDServeur.getMessage(idMessage);
+        Message message = Serveur.getBd().getMessage(idMessage);
         if (message != null) {
             message.delLike(this);
         }
@@ -95,14 +95,14 @@ public class Utilisateur implements Runnable {
     }
 
     public void deleteMessage(int idMessage) {
-        Message message = BDServeur.getMessage(idMessage);
+        Message message = Serveur.getBd().getMessage(idMessage);
         if (message != null) {
             if (message.getAuteur() != this) {
                 System.out.println("Vous n'êtes pas l'auteur de ce message.");
             }
             else {
                 this.messages.remove(message);
-                BDServeur.getMessages().remove(idMessage);
+                Serveur.getBd().getMessages().remove(idMessage);
             }
         }
         else { System.out.println("Message inexistant : " + idMessage); }
@@ -110,7 +110,7 @@ public class Utilisateur implements Runnable {
 
     public void envoieMessage(String message) {
         if (this.writer != null) {
-            BDServeur.addMessage(message, this);
+            Serveur.getBd().addMessage(message, this);
             this.writer.println(message);
         }
     }

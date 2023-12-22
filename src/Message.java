@@ -13,7 +13,7 @@ public class Message {
 
 
     public Message(String contenu, Utilisateur auteur) {
-        this.id = BDServeur.getMessages().size();
+        this.id = Serveur.getBd().getMessages().size();
         this.contenu = contenu;
         this.auteur = auteur;
         this.date = new Date();

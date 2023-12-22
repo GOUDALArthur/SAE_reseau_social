@@ -8,20 +8,19 @@ import java.net.Socket;
 public class Serveur {
 
     private static final int PORT = 8080;
+    private static BDServeur bd = new BDServeur();
+
+    public static BDServeur getBd() {
+        return bd;
+    }
 
     public static void main(String[] args) {
         try (ServerSocket socketServer = new ServerSocket(Serveur.PORT)) {
-            BDServeur.load();
             while (true) {
                 Socket socketClient = socketServer.accept();
                 System.out.println("Connexion d'un client");
                 String pseudo = authentifieClient(socketClient);
 
-                
-                
-                for (Utilisateur util : BDServeur.getUtilisateurs().values()) {
-                    System.out.print(util.getPseudo() + ", ");
-                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -36,14 +35,16 @@ public class Serveur {
         writer.println("Entrer votre nom d'utilisateur : ");
         String pseudo = reader.readLine();
         System.out.println("Authentification de " + pseudo + " en cours");
-        Utilisateur utilisateur = BDServeur.getUtilisateur(pseudo);
+        Utilisateur utilisateur = Serveur.bd.getUtilisateur(pseudo);
 
         if (utilisateur == null) {
             writer.println("inexistant");
             writer.println("Compte inexistant\nVoulez-vous créer un compte ? (O/N) ");
             if (reader.readLine().equals("O")) {
                 System.out.println("Création du compte de " + pseudo);
-                BDServeur.addUtilisateur(pseudo);
+                Serveur.bd.addUtilisateur(pseudo);
+                System.out.println(Serveur.bd.getUtilisateurs());
+                System.out.println(Serveur.bd.getUtilisateur(pseudo));
             } else {
                 writer.println("echec");
                 return null;

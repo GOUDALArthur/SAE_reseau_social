@@ -8,6 +8,7 @@ public class Client {
     private static final int PORT_SERVEUR = 8080;
 
     public static void main(String[] args) {
+        BDServeur bd = Serveur.getBd();
         try (Socket socket = new Socket(Client.IP_SERVEUR, Client.PORT_SERVEUR)) {
             System.out.println("Connexion au serveur " + IP_SERVEUR + " sur le port " + PORT_SERVEUR);
             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -24,11 +25,13 @@ public class Client {
                 writer.println(scanner.nextLine());
             }
             reponseServeur = reader.readLine();
+            System.out.println(reponseServeur);
             if (reponseServeur.equals("reussite")) {
-                Utilisateur utilisateur = BDServeur.getUtilisateur(pseudo);
+                System.out.println(bd.getUtilisateurs());
+                Utilisateur utilisateur = bd.getUtilisateur(pseudo);
                 utilisateur.setSocket(socket);
                 utilisateur.connexion();
-                new Thread(BDServeur.getUtilisateur(pseudo)).start();
+                new Thread(bd.getUtilisateur(pseudo)).start();
             }
 
             String message = reader.readLine();
