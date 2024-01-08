@@ -15,8 +15,8 @@ public class Serveur {
             while (true) {
                 Socket socketClient = socketServer.accept();
                 System.out.println("Connexion d'un client");
-                //String pseudo = authentifieClient(socketClient);
-                String pseudo = demandePseudo(socketClient);
+                String pseudo = authentifieClient(socketClient);
+                //String pseudo = demandePseudo(socketClient);
                 Utilisateur util = new Utilisateur(pseudo);
                 ClientHandler clientHandler = new ClientHandler(socketClient, util);
                 new Thread(clientHandler).start();
@@ -45,7 +45,6 @@ public class Serveur {
         writer.println("Entrer votre nom d'utilisateur : ");
         System.out.println("Attente du nom d'utilisateur...");
         String pseudo = reader.readLine();
-        System.out.println("Nom d'utilisateur reçu : " + pseudo);
         System.out.println("Authentification de " + pseudo + " en cours");
         Utilisateur utilisateur = BDServeur.getUtilisateur(pseudo);
 
@@ -56,6 +55,8 @@ public class Serveur {
                 System.out.println("Création du compte de " + pseudo);
                 BDServeur.addUtilisateur(pseudo);
             } else {
+                utilisateur = BDServeur.getUtilisateur(pseudo);
+                utilisateur.connexion();
                 writer.println("echec");
                 return null;
             }

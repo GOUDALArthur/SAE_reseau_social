@@ -18,6 +18,15 @@ public class Client {
             String pseudo = scanner.nextLine();
             writer.println(pseudo); writer.flush();
             // Authentification --> Serveur.authentifieClient()
+            String reponseServeur = reader.readLine();
+
+            if (reponseServeur.equals("inexistant")) {
+                System.out.println(reader.readLine() + "\n" + reader.readLine());
+                writer.println(scanner.nextLine());
+            }
+            reponseServeur = reader.readLine();
+            if (reponseServeur.equals("reussite")) {
+            }
 
             System.out.print("Envoyer un message : ");
             String message = scanner.nextLine();
