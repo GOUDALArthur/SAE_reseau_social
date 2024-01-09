@@ -12,8 +12,8 @@ public class Message {
     private int nbLikes;
 
 
-    public Message(String contenu, Utilisateur auteur) {
-        this.id = BDServeur.getMessages().size();
+    public Message(int id, String contenu, Utilisateur auteur) {
+        this.id = id;
         this.contenu = contenu;
         this.auteur = auteur;
         this.date = new Date();

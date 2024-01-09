@@ -51,45 +51,45 @@ public class Utilisateur {
     }
 
 
-    public void follow(String newFollow) {
-        BDServeur.addFollower(newFollow, this.pseudo);
-    }
+    //public void follow(String newFollow) {
+    //    BDServeur.addFollower(newFollow, this.pseudo);
+    //}
 
-    public void unfollow(String nomFollow) {
-        BDServeur.delFollower(nomFollow, this.pseudo);
-    }
+    //public void unfollow(String nomFollow) {
+    //    BDServeur.delFollower(nomFollow, this.pseudo);
+    //}
 
-    public void like(int idMessage) {
-        Message message = BDServeur.getMessage(idMessage);
-        if (message != null) {
-            message.addLike(this);
-        }
-        else { System.out.println("Message inexistant : " + idMessage); }
-    }
+    //public void like(int idMessage) {
+    //    Message message = BDServeur.getMessage(idMessage);
+    //    if (message != null) {
+    //        message.addLike(this);
+    //    }
+    //    else { System.out.println("Message inexistant : " + idMessage); }
+    //}
 
-    public void dislike(int idMessage) {
-        Message message = BDServeur.getMessage(idMessage);
-        if (message != null) {
-            message.delLike(this);
-        }
-        else { System.out.println("Message inexistant : " + idMessage); }
-    }
+    //public void dislike(int idMessage) {
+    //    Message message = BDServeur.getMessage(idMessage);
+    //    if (message != null) {
+    //        message.delLike(this);
+    //    }
+    //    else { System.out.println("Message inexistant : " + idMessage); }
+    //}
 
-    public void deleteMessage(int idMessage) {
-        Message message = BDServeur.getMessage(idMessage);
-        if (message != null) {
-            if (message.getAuteur() != this) {
-                System.out.println("Vous n'êtes pas l'auteur de ce message.");
-            }
-            else {
-                this.messages.remove(message);
-                BDServeur.getMessages().remove(idMessage);
-            }
-        }
-        else { System.out.println("Message inexistant : " + idMessage); }
-    }
+    //public void deleteMessage(int idMessage) {
+    //    Message message = BDServeur.getMessage(idMessage);
+    //    if (message != null) {
+    //        if (message.getAuteur() != this) {
+    //            System.out.println("Vous n'êtes pas l'auteur de ce message.");
+    //        }
+    //        else {
+    //            this.messages.remove(message);
+    //            BDServeur.getMessages().remove(idMessage);
+    //        }
+    //    }
+    //    else { System.out.println("Message inexistant : " + idMessage); }
+    //}
 
-    public void envoieMessage(String message) {
-        BDServeur.addMessage(message, this);
-    }
+    //public void envoieMessage(String message) {
+    //    BDServeur.addMessage(message, this);
+    //}
 }

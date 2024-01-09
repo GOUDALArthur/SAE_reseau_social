@@ -11,15 +11,17 @@ public class Serveur {
 
     public static void main(String[] args) {
         try (ServerSocket socketServer = new ServerSocket(Serveur.PORT)) {
-            BDServeur.load();
+            BDServeur bd = new BDServeur();
+            bd.load();
             while (true) {
                 Socket socketClient = socketServer.accept();
                 System.out.println("Connexion d'un client");
-                String pseudo = authentifieClient(socketClient);
+                String pseudo = authentifieClient(bd, socketClient);
                 //String pseudo = demandePseudo(socketClient);
                 Utilisateur util = new Utilisateur(pseudo);
                 ClientHandler clientHandler = new ClientHandler(socketClient, util);
                 new Thread(clientHandler).start();
+                System.out.println("Client connecté : " + pseudo);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -38,7 +40,7 @@ public class Serveur {
         return pseudo;
     }
 
-    private static String authentifieClient(Socket socketClient) throws IOException {
+    private static String authentifieClient(BDServeur bd, Socket socketClient) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
         PrintWriter writer = new PrintWriter(socketClient.getOutputStream(), true);
         
@@ -46,21 +48,21 @@ public class Serveur {
         System.out.println("Attente du nom d'utilisateur...");
         String pseudo = reader.readLine();
         System.out.println("Authentification de " + pseudo + " en cours");
-        Utilisateur utilisateur = BDServeur.getUtilisateur(pseudo);
+        Utilisateur utilisateur = bd.getUtilisateur(pseudo);
 
         if (utilisateur == null) {
             writer.println("inexistant");
             writer.println("Compte inexistant\nVoulez-vous créer un compte ? (O/N) ");
             if (reader.readLine().equals("O")) {
                 System.out.println("Création du compte de " + pseudo);
-                BDServeur.addUtilisateur(pseudo);
+                bd.addUtilisateur(pseudo);
+                utilisateur = bd.getUtilisateur(pseudo);
             } else {
-                utilisateur = BDServeur.getUtilisateur(pseudo);
-                utilisateur.connexion();
                 writer.println("echec");
                 return null;
             }
         }
+        utilisateur.connexion();
         writer.println("reussite");
         return pseudo;
     }

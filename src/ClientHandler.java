@@ -28,7 +28,7 @@ public class ClientHandler implements Runnable {
         try {
             Scanner scanner = new Scanner(System.in);
 
-            writer.println("Bienvenue, " + this.utilisateur.getPseudo() + " ! On est encore en test mais tkt ça arrive fort !"); writer.flush();
+            writer.println("\n" + "Bienvenue, " + this.utilisateur.getPseudo() + " ! On est encore en test mais tkt ça arrive fort !" + "\n"); writer.flush();
 
             String message = this.reader.readLine();
             while (message != null) {
