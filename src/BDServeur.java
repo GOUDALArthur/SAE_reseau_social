@@ -5,20 +5,26 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class BDServeur {
 
+    private static BDServeur instance = null;
     private Map<String, Utilisateur> utilisateurs;
     private Map<Integer, Message> messages;
     private Map<String, Set<String>> followers;
     private Map<String, Set<String>> follows;
 
-    public BDServeur() {
+    private BDServeur() {}
+
+    public static BDServeur getInstance() {
+        if (BDServeur.instance == null) {
+            BDServeur.instance = new BDServeur();
+        }
+        return BDServeur.instance;
+    }
+
+    public void load() {
         this.utilisateurs = new ConcurrentHashMap<>();
         this.messages = new ConcurrentHashMap<>();
         this.followers = new ConcurrentHashMap<>();
         this.follows = new ConcurrentHashMap<>();
-    }
-
-
-    public void load() {
         //TODO : charger les utilisateurs et les messages depuis un fichier JSON
     }
 

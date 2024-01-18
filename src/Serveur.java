@@ -11,13 +11,12 @@ public class Serveur {
 
     public static void main(String[] args) {
         try (ServerSocket socketServer = new ServerSocket(Serveur.PORT)) {
-            BDServeur bd = new BDServeur();
+            BDServeur bd = BDServeur.getInstance();
             bd.load();
             while (true) {
                 Socket socketClient = socketServer.accept();
                 System.out.println("Connexion d'un client");
                 String pseudo = authentifieClient(bd, socketClient);
-                //String pseudo = demandePseudo(socketClient);
                 Utilisateur util = new Utilisateur(pseudo);
                 ClientHandler clientHandler = new ClientHandler(socketClient, util);
                 new Thread(clientHandler).start();
@@ -27,17 +26,6 @@ public class Serveur {
             e.printStackTrace();
             System.out.println(e.getMessage());
         }
-    }
-
-    private static String demandePseudo(Socket socketClient) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
-        PrintWriter writer = new PrintWriter(socketClient.getOutputStream(), true);
-        
-        writer.println("Entrer votre nom d'utilisateur : ");
-        System.out.println("Attente du nom d'utilisateur...");
-        String pseudo = reader.readLine();
-        System.out.println("Nom d'utilisateur reçu : " + pseudo);
-        return pseudo;
     }
 
     private static String authentifieClient(BDServeur bd, Socket socketClient) throws IOException {
@@ -52,8 +40,9 @@ public class Serveur {
 
         if (utilisateur == null) {
             writer.println("inexistant");
-            writer.println("Compte inexistant\nVoulez-vous créer un compte ? (O/N) ");
-            if (reader.readLine().equals("O")) {
+            writer.println("Compte inexistant\nVoulez-vous créer un compte ? (O/N)");
+            String choix = reader.readLine();
+            if (choix.equals("O") || choix.equals("o")) {
                 System.out.println("Création du compte de " + pseudo);
                 bd.addUtilisateur(pseudo);
                 utilisateur = bd.getUtilisateur(pseudo);

@@ -27,7 +27,23 @@ public class Client {
             }
             
             if (reponseServeur.equals("reussite")) {
-                System.out.println(reader.readLine());
+                // Création d'un thread pour recevoir et afficher les réponses du serveur en permanence
+                Thread lecteurServeur = new Thread(() -> {
+                    String reponse;
+                    try {
+                        while ((reponse = reader.readLine()) != null) {
+                            if (reponse.equals("\n"))
+                                System.out.println(reponse);
+                            else if (!reponse.equals(""))
+                                System.out.println("[SERVEUR] : " + reponse);
+                        }
+                    } catch (IOException e) {
+                        System.out.println("Erreur de lecture depuis le serveur : " + e.getMessage());
+                    }
+                });
+                lecteurServeur.start();
+                Thread.sleep(500);
+
                 System.out.print("Envoyer un message : ");
                 String message = scanner.nextLine();
                 while (message != null) {
@@ -39,7 +55,9 @@ public class Client {
             scanner.close();
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(e.getMessage());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
     }
 
