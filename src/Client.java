@@ -42,7 +42,7 @@ public class Client {
                     }
                 });
                 lecteurServeur.start();
-                Thread.sleep(500);
+                Thread.sleep(1000);
 
                 System.out.print("Envoyer un message : ");
                 String message = scanner.nextLine();

@@ -160,7 +160,7 @@ public class ClientHandler implements Runnable {
         if (!this.utilisateur.getMessages().contains(message)) {
             return "Erreur --> Vous ne pouvez pas supprimer un message qui n'est pas le votre";
         }
-        this.bd.delMessage(idMessage);
+        this.bd.deleteMessage(idMessage);
         this.utilisateur.deleteMessage(message);
         return "Vous avez supprimé le message " + idMessage;
     }

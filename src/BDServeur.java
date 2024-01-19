@@ -2,6 +2,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.io.FileWriter;
+import java.io.IOException;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
 
 public class BDServeur {
 
@@ -30,6 +34,21 @@ public class BDServeur {
 
     public void save() {
         //TODO : sauvegarder les utilisateurs et les messages dans un fichier JSON
+        try (FileWriter json = new FileWriter("utilisateurs.json")) {
+            JSONObject util = new JSONObject();
+            for (Map.Entry<String, Utilisateur> entry : this.utilisateurs.entrySet()) {
+                String pseudo = entry.getKey();
+                util = new JSONObject();
+                util.put("pseudo",pseudo);
+                Set<String> setFollowers = this.followers.getOrDefault(pseudo, new HashSet<>());
+                JSONArray listFollowers = new JSONArray();
+                listFollowers.addAll(setFollowers);
+                util.put("followers", listFollowers);
+            }
+            json.write(util.toJSONString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -50,17 +69,11 @@ public class BDServeur {
     }
 
     public Utilisateur getUtilisateur(String pseudo) {
-        if (this.utilisateurs.containsKey(pseudo)) {
-            return this.utilisateurs.get(pseudo);
-        }
-        return null;
+        return this.utilisateurs.getOrDefault(pseudo, null);
     }
 
     public Message getMessage(int id) {
-        if (this.messages.get(id) != null) {
-            return this.messages.get(id);
-        }
-        return null;
+        return this.messages.getOrDefault(id, null);
     }
 
 
@@ -68,8 +81,12 @@ public class BDServeur {
         this.utilisateurs.put(pseudo, new Utilisateur(pseudo));
     }
 
-    public void delUtilisateur(String pseudo) {
+    public void removeUtilisateur(String pseudo) {
         this.utilisateurs.remove(pseudo);
+    }
+
+    public void removeUtilisateur(Utilisateur utilisateur) {
+        this.utilisateurs.remove(utilisateur.getPseudo());
     }
 
     public void addMessage(String contenu, Utilisateur auteur) {
@@ -77,8 +94,12 @@ public class BDServeur {
         this.messages.put(newMessage.getId(), newMessage);
     }
 
-    public void delMessage(int id) {
+    public void deleteMessage(int id) {
         this.messages.remove(id);
+    }
+
+    public void deleteMessage(Message message) {
+        this.messages.remove(message.getId());
     }
 
     public void addFollower(String followed, String follower) {

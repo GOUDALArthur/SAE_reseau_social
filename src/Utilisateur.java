@@ -12,9 +12,10 @@ public class Utilisateur {
 
     public Utilisateur(String pseudo) {
         this.pseudo = pseudo;
-        this.estConnecte = false;
         this.messages = new ArrayList<>();
         this.nbFollowers = 0;
+        this.nbFollowing = 0;
+        this.estConnecte = false;
     }
 
 
