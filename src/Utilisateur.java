@@ -43,6 +43,10 @@ public class Utilisateur {
         this.pseudo = pseudo;
     }
 
+    public void addMessage(Message message) {
+        this.messages.add(message);
+    }
+
     public void deleteMessage(Message message) {
         this.messages.remove(message);
     }

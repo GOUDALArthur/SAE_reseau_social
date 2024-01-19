@@ -50,7 +50,7 @@ public class Message {
         this.nbLikes++;
     }
 
-    public void delLike(Utilisateur utilisateur) {
+    public void deleteLike(Utilisateur utilisateur) {
         this.likes.remove(utilisateur);
         this.nbLikes--;
     }

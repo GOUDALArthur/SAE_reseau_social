@@ -4,35 +4,22 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Serveur {
 
     private static final int PORT = 8080;
+    private static Map<String, ClientHandler> clients = new ConcurrentHashMap<String, ClientHandler>();
 
     public static void main(String[] args) {
         try (ServerSocket socketServer = new ServerSocket(Serveur.PORT)) {
             BDServeur bd = BDServeur.getInstance();
             bd.load();
             Scanner scanner = new Scanner(System.in);
-            String commandeServeur = "";
-            while (!commandeServeur.equals("/shutdown")) {
-                Socket socketClient = socketServer.accept();
-                Thread authentificateur = new Thread(() -> {
-                    try {
-                        System.out.println("Connexion d'un client");
-                        String pseudo = Serveur.authentifieClient(socketClient);
-                        Utilisateur util = new Utilisateur(pseudo);
-                        ClientHandler clientHandler = new ClientHandler(socketClient, util);
-                        new Thread(clientHandler).start();
-                        System.out.println("Client connecté : " + pseudo);
-                    } catch (IOException e) {
-                        System.out.println("Erreur de lecture depuis le serveur : " + e.getMessage());
-                    }
-                });
-                authentificateur.start();
-
-                commandeServeur = scanner.nextLine();
+            Thread lecteurCommandes = new Thread(() -> {
+                String commandeServeur = scanner.nextLine();
                 if (commandeServeur.startsWith("/")) {
                     String[] commande = commandeServeur.split(" ");
                     commande[0] = commande[0].substring(1);
@@ -43,17 +30,39 @@ public class Serveur {
                         case "remove":
                             Serveur.removeUtilisateur(commande);
                             break;
+                        case "shutdown":
+                            System.out.println("Arrêt du serveur...");
+                            scanner.close();
+                            bd.save();
+                            break;
                         default:
                             System.out.println("Commande inconnue");
                             break;
                     }
                 }
+            });
+            lecteurCommandes.start();
+            while (true) {
+                Socket socketClient = socketServer.accept();
+                Thread authentificateur = new Thread(() -> {
+                    try {
+                        String pseudo = Serveur.authentifieClient(socketClient);
+                        Utilisateur util = new Utilisateur(pseudo);
+                        ClientHandler clientHandler = new ClientHandler(socketClient, util);
+                        new Thread(clientHandler).start();
+                        Serveur.clients.put(pseudo, clientHandler);
+                    } catch (IOException e) {
+                    }
+                });
+                authentificateur.start();
             }
-            scanner.close();
-            bd.save();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static ClientHandler getClientHandler(String pseudo) {
+        return Serveur.clients.get(pseudo);
     }
 
     private static String authentifieClient(Socket socketClient) throws IOException {
@@ -62,9 +71,7 @@ public class Serveur {
         PrintWriter writer = new PrintWriter(socketClient.getOutputStream(), true);
         
         writer.println("Entrer votre nom d'utilisateur : ");
-        System.out.println("Attente du nom d'utilisateur...");
         String pseudo = reader.readLine();
-        System.out.println("Authentification de " + pseudo + " en cours");
         Utilisateur utilisateur = bd.getUtilisateur(pseudo);
 
         if (utilisateur == null) {
@@ -72,7 +79,6 @@ public class Serveur {
             writer.println("Compte inexistant\nVoulez-vous créer un compte ? (O/N)");
             String choix = reader.readLine();
             if (choix.equals("O") || choix.equals("o")) {
-                System.out.println("Création du compte de " + pseudo);
                 bd.addUtilisateur(pseudo);
                 utilisateur = bd.getUtilisateur(pseudo);
             } else {

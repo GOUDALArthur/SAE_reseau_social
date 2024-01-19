@@ -1,4 +1,5 @@
 import java.net.Socket;
+import java.util.HashSet;
 import java.util.Scanner;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,11 +30,12 @@ public class ClientHandler implements Runnable {
         try {
             Scanner scanner = new Scanner(System.in);
 
-            writer.println("\nBienvenue, " + this.utilisateur.getPseudo() + " ! On est encore en test mais tkt ça arrive fort !\n"); writer.flush();
+            String bienvenue = "Bienvenue, " + this.utilisateur.getPseudo() + " ! On est encore en test mais tkt ça arrive fort !";
+            String intro = "Suivez vos amis avec /follow ! Envoyez des messages en appuyant sur Entrée ! (Utilisez /help)";
+            writer.println(bienvenue + "\n" + intro); writer.flush();
 
             String message = this.reader.readLine();
             while (message != null) {
-                System.out.println(message);
                 if (message.startsWith("/")) {
                     String[] commande = message.split(" ");
                     commande[0] = commande[0].substring(1);
@@ -65,12 +67,14 @@ public class ClientHandler implements Runnable {
                             break;
                     }
                 }
+                else {
+                    this.envoieMessage(message);
+                }
                 message = this.reader.readLine();
             }
             scanner.close();
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println(e.getMessage());
         } finally {
             try {
                 this.reader.close();
@@ -78,11 +82,14 @@ public class ClientHandler implements Runnable {
                 this.socketClient.close();
             } catch (IOException e) {
                 e.printStackTrace();
-                System.out.println(e.getMessage());
             } finally {
                 this.utilisateur.deconnexion();
             }
         }
+    }
+
+    public PrintWriter getWriter() {
+        return this.writer;
     }
 
     private String follow(String[] commande) {
@@ -145,7 +152,7 @@ public class ClientHandler implements Runnable {
         if (!message.getLikes().contains(this.utilisateur)) {
             return "Erreur --> Vous n'avez pas liké ce message";
         }
-        message.delLike(this.utilisateur);
+        message.deleteLike(this.utilisateur);
         return "Vous ne likez plus le message " + idMessage;
     }
 
@@ -164,4 +171,15 @@ public class ClientHandler implements Runnable {
         this.utilisateur.deleteMessage(message);
         return "Vous avez supprimé le message " + idMessage;
     }
+
+    private void envoieMessage(String message) {
+        Message messageObjet = new Message(this.bd.getMessages().size(), message, this.utilisateur);
+        this.bd.addMessage(messageObjet);
+        this.utilisateur.addMessage(messageObjet);
+        for (String follower : this.bd.getFollowers().getOrDefault(this.utilisateur.getPseudo(), new HashSet<>())) {
+            PrintWriter followerWriter = Serveur.getClientHandler(follower).getWriter();
+            followerWriter.println(messageObjet.getAuteur().getPseudo() + " : " + messageObjet.getContenu());
+        }
+    }
+
 }

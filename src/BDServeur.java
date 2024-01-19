@@ -33,19 +33,40 @@ public class BDServeur {
     }
 
     public void save() {
-        //TODO : sauvegarder les utilisateurs et les messages dans un fichier JSON
-        try (FileWriter json = new FileWriter("utilisateurs.json")) {
-            JSONObject util = new JSONObject();
+        try (FileWriter utilJson = new FileWriter("bd/users.json");
+             FileWriter messJson = new FileWriter("bd/messages.json")) {
+            JSONArray data = new JSONArray();
+            JSONObject obj = new JSONObject();
             for (Map.Entry<String, Utilisateur> entry : this.utilisateurs.entrySet()) {
                 String pseudo = entry.getKey();
-                util = new JSONObject();
-                util.put("pseudo",pseudo);
+                obj = new JSONObject();
+                obj.put("nickname",pseudo);
                 Set<String> setFollowers = this.followers.getOrDefault(pseudo, new HashSet<>());
                 JSONArray listFollowers = new JSONArray();
                 listFollowers.addAll(setFollowers);
-                util.put("followers", listFollowers);
+                obj.put("followers", listFollowers);
+                data.add(obj);
             }
-            json.write(util.toJSONString());
+            utilJson.write(data.toJSONString());
+            data = new JSONArray();
+            for (Map.Entry<Integer, Message> entry : this.messages.entrySet()) {
+                int id = entry.getKey();
+                Message message = entry.getValue();
+                obj = new JSONObject();
+                obj.put("id", id);
+                obj.put("user", message.getAuteur().getPseudo());
+                obj.put("content", message.getContenu());
+                obj.put("date", message.getDate().toString());
+                Set<String> setLikes = new HashSet<>();
+                for (Utilisateur utilisateur : message.getLikes()) {
+                    setLikes.add(utilisateur.getPseudo());
+                }
+                JSONArray listLikes = new JSONArray();
+                listLikes.addAll(setLikes);
+                obj.put("likes", listLikes);
+                data.add(obj);
+            }
+            messJson.write(data.toJSONString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -94,6 +115,10 @@ public class BDServeur {
         this.messages.put(newMessage.getId(), newMessage);
     }
 
+    public void addMessage(Message message) {
+        this.messages.put(message.getId(), message);
+    }
+
     public void deleteMessage(int id) {
         this.messages.remove(id);
     }
@@ -104,13 +129,13 @@ public class BDServeur {
 
     public void addFollower(String followed, String follower) {
         // Ajout dans la liste des followers
-        if (this.followers.containsKey(followed)) {
+        if (!this.followers.containsKey(followed)) {
             this.followers.put(followed, new HashSet<>());
         }
         this.followers.get(followed).add(follower);
 
         // Ajout dans la liste des follows
-        if (this.follows.containsKey(follower)) {
+        if (!this.follows.containsKey(follower)) {
             this.follows.put(follower, new HashSet<>());
         }
         this.follows.get(follower).add(followed);

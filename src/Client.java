@@ -44,11 +44,9 @@ public class Client {
                 lecteurServeur.start();
                 Thread.sleep(1000);
 
-                System.out.print("Envoyer un message : ");
                 String message = scanner.nextLine();
                 while (message != null) {
                     writer.println(message); writer.flush();
-                    System.out.print("Envoyer un message : ");
                     message = scanner.nextLine();
                 }
             }
