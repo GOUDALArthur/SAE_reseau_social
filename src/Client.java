@@ -4,8 +4,16 @@ import java.util.Scanner;
 
 public class Client {
 
+    /**
+     * Adresse IP du serveur.
+     */
     private static final String IP_SERVEUR = "localhost";
+
+    /**
+     * Port d'écoute du serveur.
+     */
     private static final int PORT_SERVEUR = 8080;
+
 
     public static void main(String[] args) {
         try (Socket socket = new Socket(Client.IP_SERVEUR, Client.PORT_SERVEUR)) {
@@ -16,7 +24,9 @@ public class Client {
 
             System.out.println(reader.readLine());
             String pseudo = scanner.nextLine();
-            writer.println(pseudo); writer.flush();
+            writer.println(pseudo);
+            writer.flush();
+
             // Authentification --> Serveur.authentifieClient()
             String reponseServeur = reader.readLine();
 
@@ -25,7 +35,7 @@ public class Client {
                 writer.println(scanner.nextLine());
                 reponseServeur = reader.readLine();
             }
-            
+
             if (reponseServeur.equals("reussite")) {
                 // Création d'un thread pour recevoir et afficher les réponses du serveur en permanence
                 Thread lecteurServeur = new Thread(() -> {
@@ -46,7 +56,8 @@ public class Client {
 
                 String message = scanner.nextLine();
                 while (message != null) {
-                    writer.println(message); writer.flush();
+                    writer.println(message);
+                    writer.flush();
                     message = scanner.nextLine();
                 }
             }
@@ -58,5 +69,4 @@ public class Client {
             Thread.currentThread().interrupt();
         }
     }
-
 }

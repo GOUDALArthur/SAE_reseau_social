@@ -10,14 +10,27 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Serveur {
 
+    /**
+     * Port d'écoute du serveur.
+     */
     private static final int PORT = 8080;
+
+    /**
+     * Map pour stocker les gestionnaires de clients connectés.
+     */
     private static Map<String, ClientHandler> clients = new ConcurrentHashMap<String, ClientHandler>();
 
+    /**
+     * Méthode principale du serveur.
+     *
+     */
     public static void main(String[] args) {
         try (ServerSocket socketServer = new ServerSocket(Serveur.PORT)) {
             BDServeur bd = BDServeur.getInstance();
             bd.load();
             Scanner scanner = new Scanner(System.in);
+
+            // Thread pour lire les commandes serveur depuis la console.
             Thread lecteurCommandes = new Thread(() -> {
                 String commandeServeur = scanner.nextLine();
                 if (commandeServeur.startsWith("/")) {
@@ -42,6 +55,8 @@ public class Serveur {
                 }
             });
             lecteurCommandes.start();
+
+            // Boucle principale pour accepter les connexions des clients.
             while (true) {
                 Socket socketClient = socketServer.accept();
                 Thread authentificateur = new Thread(() -> {
@@ -52,6 +67,7 @@ public class Serveur {
                         new Thread(clientHandler).start();
                         Serveur.clients.put(pseudo, clientHandler);
                     } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 });
                 authentificateur.start();
@@ -61,15 +77,28 @@ public class Serveur {
         }
     }
 
+    /**
+     * Obtient le gestionnaire de client pour un pseudo donné.
+     *
+     * @param pseudo Le pseudo de l'utilisateur.
+     * @return Le gestionnaire de client associé au pseudo.
+     */
     public static ClientHandler getClientHandler(String pseudo) {
         return Serveur.clients.get(pseudo);
     }
 
+    /**
+     * Authentifie un client lors de sa connexion.
+     *
+     * @param socketClient La socket du client.
+     * @return Le pseudo de l'utilisateur authentifié.
+     * @throws IOException En cas d'erreur.
+     */
     private static String authentifieClient(Socket socketClient) throws IOException {
         BDServeur bd = BDServeur.getInstance();
         BufferedReader reader = new BufferedReader(new InputStreamReader(socketClient.getInputStream()));
         PrintWriter writer = new PrintWriter(socketClient.getOutputStream(), true);
-        
+
         writer.println("Entrer votre nom d'utilisateur : ");
         String pseudo = reader.readLine();
         Utilisateur utilisateur = bd.getUtilisateur(pseudo);
@@ -91,6 +120,11 @@ public class Serveur {
         return pseudo;
     }
 
+    /**
+     * Supprime un message.
+     *
+     * @param commande La commande serveur.
+     */
     private static void deleteMessage(String[] commande) {
         BDServeur bd = BDServeur.getInstance();
         int idMessage;
@@ -109,6 +143,11 @@ public class Serveur {
         }
     }
 
+    /**
+     * Supprime un utilisateur.
+     *
+     * @param commande La commande serveur.
+     */
     private static void removeUtilisateur(String[] commande) {
         BDServeur bd = BDServeur.getInstance();
         String pseudo = commande[1];
@@ -120,5 +159,4 @@ public class Serveur {
             System.out.println("Cet utilisateur n'existe pas");
         }
     }
-
 }

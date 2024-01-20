@@ -8,12 +8,37 @@ import java.io.PrintWriter;
 
 public class ClientHandler implements Runnable {
 
+    /**
+     * Socket du client.
+     */
     private Socket socketClient;
+
+    /**
+     * Lecteur des messages de la socket.
+     */
     private BufferedReader reader;
+
+    /**
+     * Écrivain des messages sur la socket.
+     */
     private PrintWriter writer;
+
+    /**
+     * Utilisateur associé au client.
+     */
     private Utilisateur utilisateur;
+
+    /**
+     * Instance de la base de données serveur.
+     */
     private BDServeur bd = BDServeur.getInstance();
 
+    /**
+     * Constructeur de la classe.
+     *
+     * @param socketClient Socket du client.
+     * @param utilisateur Utilisateur associé au client.
+     */
     public ClientHandler(Socket socketClient, Utilisateur utilisateur) {
         this.socketClient = socketClient;
         this.utilisateur = utilisateur;
@@ -25,6 +50,9 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * Méthode exécutée dans le thread.
+     */
     @Override
     public void run() {
         try {
@@ -32,7 +60,8 @@ public class ClientHandler implements Runnable {
 
             String bienvenue = "Bienvenue, " + this.utilisateur.getPseudo() + " ! On est encore en test mais tkt ça arrive fort !";
             String intro = "Suivez vos amis avec /follow ! Envoyez des messages en appuyant sur Entrée ! (Utilisez /help)";
-            writer.println(bienvenue + "\n" + intro); writer.flush();
+            writer.println(bienvenue + "\n" + intro);
+            writer.flush();
 
             String message = this.reader.readLine();
             while (message != null) {
@@ -48,26 +77,31 @@ public class ClientHandler implements Runnable {
                                            "/delete <id_message> : supprimer un de ses messages\n");
                             break;
                         case "follow":
-                            writer.println(this.follow(commande)); writer.flush();
+                            writer.println(this.follow(commande));
+                            writer.flush();
                             break;
                         case "unfollow":
-                            writer.println(this.unfollow(commande)); writer.flush();
+                            writer.println(this.unfollow(commande));
+                            writer.flush();
                             break;
                         case "like":
-                            writer.println(this.like(commande)); writer.flush();
+                            writer.println(this.like(commande));
+                            writer.flush();
                             break;
                         case "dislike":
-                            writer.println(this.dislike(commande)); writer.flush();
+                            writer.println(this.dislike(commande));
+                            writer.flush();
                             break;
                         case "delete":
-                            writer.println(this.deleteMessage(commande)); writer.flush();
+                            writer.println(this.deleteMessage(commande));
+                            writer.flush();
                             break;
                         default:
-                            writer.println("Commande inconnue"); writer.flush();
+                            writer.println("Commande inconnue");
+                            writer.flush();
                             break;
                     }
-                }
-                else {
+                } else {
                     this.envoieMessage(message);
                 }
                 message = this.reader.readLine();
@@ -88,10 +122,21 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * Donne l'écrivain de la socket pour l'envoi de messages au client.
+     *
+     * @return L'écrivain de la socket.
+     */
     public PrintWriter getWriter() {
         return this.writer;
     }
 
+    /**
+     * Méthode pour suivre un utilisateur.
+     *
+     * @param commande Les éléments de la commande client.
+     * @return Le résultat de l'opération.
+     */
     private String follow(String[] commande) {
         if (commande.length < 2)
             return "Erreur --> Préciser le pseudo de l'utilisateur à suivre";
@@ -105,6 +150,12 @@ public class ClientHandler implements Runnable {
         return "Vous suivez désormais " + commande[1];
     }
 
+    /**
+     * Méthode pour ne plus suivre un utilisateur.
+     *
+     * @param commande Les éléments de la commande client.
+     * @return Le résultat de l'opération.
+     */
     private String unfollow(String[] commande) {
         if (commande.length < 2)
             return "Erreur --> Préciser le pseudo de l'utilisateur à ne plus suivre";
@@ -118,6 +169,12 @@ public class ClientHandler implements Runnable {
         return "Vous ne suivez désormais plus " + commande[1];
     }
 
+    /**
+     * Méthode pour aimer un message.
+     *
+     * @param commande Les éléments de la commande client.
+     * @return Le résultat de l'opération.
+     */
     private String like(String[] commande) {
         if (commande.length < 2)
             return "Erreur --> Préciser l'id du message";
@@ -136,50 +193,65 @@ public class ClientHandler implements Runnable {
         message.addLike(this.utilisateur);
         return "Vous avez liké le message " + idMessage;
     }
-
-    private String dislike(String[] commande) {
-        if (commande.length < 2)
-            return "Erreur --> Préciser l'id du message";
-        int idMessage;
-        try {
-            idMessage = Integer.parseInt(commande[1]);
-        } catch (NumberFormatException e) {
-            return "Erreur --> L'id du message doit être un entier";
-        }
-        if (this.bd.getMessage(idMessage) == null)
-            return "Erreur --> Message inexistant";
-        Message message = this.bd.getMessage(idMessage);
-        if (!message.getLikes().contains(this.utilisateur)) {
-            return "Erreur --> Vous n'avez pas liké ce message";
-        }
-        message.deleteLike(this.utilisateur);
-        return "Vous ne likez plus le message " + idMessage;
+/**
+ * Méthode pour ne plus aimer un message.
+ *
+ * @param commande Les éléments de la commande client.
+ * @return Le résultat de l'opération.
+ */
+private String dislike(String[] commande) {
+    if (commande.length < 2)
+        return "Erreur --> Préciser l'id du message";
+    int idMessage;
+    try {
+        idMessage = Integer.parseInt(commande[1]);
+    } catch (NumberFormatException e) {
+        return "Erreur --> L'id du message doit être un entier";
     }
-
-    public String deleteMessage(String[] commande) {
-        int idMessage;
-        try {
-            idMessage = Integer.parseInt(commande[1]);
-        } catch (NumberFormatException e) {
-            return "Erreur --> L'id du message doit être un entier";
-        }
-        Message message = this.bd.getMessage(idMessage);
-        if (!this.utilisateur.getMessages().contains(message)) {
-            return "Erreur --> Vous ne pouvez pas supprimer un message qui n'est pas le votre";
-        }
-        this.bd.deleteMessage(idMessage);
-        this.utilisateur.deleteMessage(message);
-        return "Vous avez supprimé le message " + idMessage;
+    if (this.bd.getMessage(idMessage) == null)
+        return "Erreur --> Message inexistant";
+    Message message = this.bd.getMessage(idMessage);
+    if (!message.getLikes().contains(this.utilisateur)) {
+        return "Erreur --> Vous n'avez pas liké ce message";
     }
+    message.deleteLike(this.utilisateur);
+    return "Vous ne likez plus le message " + idMessage;
+}
 
-    private void envoieMessage(String message) {
-        Message messageObjet = new Message(this.bd.getMessages().size(), message, this.utilisateur);
-        this.bd.addMessage(messageObjet);
-        this.utilisateur.addMessage(messageObjet);
-        for (String follower : this.bd.getFollowers().getOrDefault(this.utilisateur.getPseudo(), new HashSet<>())) {
-            PrintWriter followerWriter = Serveur.getClientHandler(follower).getWriter();
-            followerWriter.println("(" + messageObjet.getId() + ") " + messageObjet.getAuteur().getPseudo() + " : " + messageObjet.getContenu());
-        }
+/**
+ * Méthode pour supprimer un message.
+ *
+ * @param commande Les éléments de la commande client.
+ * @return Le résultat de l'opération.
+ */
+public String deleteMessage(String[] commande) {
+    int idMessage;
+    try {
+        idMessage = Integer.parseInt(commande[1]);
+    } catch (NumberFormatException e) {
+        return "Erreur --> L'id du message doit être un entier";
     }
+    Message message = this.bd.getMessage(idMessage);
+    if (!this.utilisateur.getMessages().contains(message)) {
+        return "Erreur --> Vous ne pouvez pas supprimer un message qui n'est pas le votre";
+    }
+    this.bd.deleteMessage(idMessage);
+    this.utilisateur.deleteMessage(message);
+    return "Vous avez supprimé le message " + idMessage;
+}
 
+/**
+ * Méthode pour envoyer un message.
+ *
+ * @param message Le message à envoyer.
+ */
+private void envoieMessage(String message) {
+    Message messageObjet = new Message(this.bd.getMessages().size(), message, this.utilisateur);
+    this.bd.addMessage(messageObjet);
+    this.utilisateur.addMessage(messageObjet);
+    for (String follower : this.bd.getFollowers().getOrDefault(this.utilisateur.getPseudo(), new HashSet<>())) {
+        PrintWriter followerWriter = Serveur.getClientHandler(follower).getWriter();
+        followerWriter.println("(" + messageObjet.getId() + ") " + messageObjet.getAuteur().getPseudo() + " : " + messageObjet.getContenu());
+    }
+}
 }

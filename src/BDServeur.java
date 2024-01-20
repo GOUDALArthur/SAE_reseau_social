@@ -15,14 +15,41 @@ import org.json.simple.parser.ParseException;
 
 public class BDServeur {
 
+    /**
+     * Instance unique de la base de données (singleton).
+     */
     private static BDServeur instance = null;
+
+    /**
+     * Map des utilisateurs, associant un pseudo à un objet Utilisateur.
+     */
     private Map<String, Utilisateur> utilisateurs;
+
+    /**
+     * Map des messages, associant un identifiant à un objet Message.
+     */
     private Map<Integer, Message> messages;
+
+    /**
+     * Map des followers, associant un pseudo à un ensemble de pseudos qui le follow.
+     */
     private Map<String, Set<String>> followers;
+
+    /**
+     * Map des follows, associant un pseudo à un ensemble de pseudos qu'il follow.
+     */
     private Map<String, Set<String>> follows;
 
+    /**
+     * Constructeur privé du singleton.
+     */
     private BDServeur() {}
 
+    /**
+     * Méthode permettant d'obtenir l'instance unique de la base de données.
+     *
+     * @return L'instance unique de la base de données.
+     */
     public static BDServeur getInstance() {
         if (BDServeur.instance == null) {
             BDServeur.instance = new BDServeur();
@@ -30,6 +57,9 @@ public class BDServeur {
         return BDServeur.instance;
     }
 
+    /**
+     * Charge les données depuis les fichiers JSON.
+     */
     public void load() {
         this.utilisateurs = new ConcurrentHashMap<>();
         this.messages = new ConcurrentHashMap<>();
@@ -87,6 +117,9 @@ public class BDServeur {
         System.out.println(this.follows);
     }
 
+    /**
+     * Sauvegarde les données dans les fichiers JSON.
+     */
     public void save() {
         try (FileWriter utilJson = new FileWriter("bd/users.json");
              FileWriter messJson = new FileWriter("bd/messages.json")) {
@@ -127,61 +160,131 @@ public class BDServeur {
         }
     }
 
-
+    /**
+     * Donne la map des utilisateurs.
+     *
+     * @return La map des utilisateurs.
+     */
     public Map<String, Utilisateur> getUtilisateurs() {
         return this.utilisateurs;
     }
 
+    /**
+     * Donne la map des messages.
+     *
+     * @return La map des messages.
+     */
     public Map<Integer, Message> getMessages() {
         return this.messages;
     }
-
+    /**
+     * Donne la map des followers.
+     *
+     * @return La map des followers.
+     */
     public Map<String, Set<String>> getFollowers() {
         return this.followers;
     }
-
+/**
+     * Donne la map des follows.
+     *
+     * @return La map des follows.
+     */
     public Map<String, Set<String>> getFollows() {
         return this.follows;
     }
 
+    /**
+     * Donne un utilisateur à partir de son pseudo.
+     *
+     * @param pseudo Le pseudo de l'utilisateur recherché.
+     * @return L'objet Utilisateur correspondant au pseudo, ou null si l'utilisateur n'existe pas.
+     */
     public Utilisateur getUtilisateur(String pseudo) {
         return this.utilisateurs.getOrDefault(pseudo, null);
     }
 
+    /**
+     * Donne un message à partir de son identifiant.
+     *
+     * @param id L'identifiant du message recherché.
+     * @return L'objet Message correspondant à l'identifiant, ou null si le message n'existe pas.
+     */
     public Message getMessage(int id) {
         return this.messages.getOrDefault(id, null);
     }
 
-
+    /**
+     * Ajoute un utilisateur à la base de données.
+     *
+     * @param pseudo Le pseudo de l'utilisateur à ajouter.
+     */
     public void addUtilisateur(String pseudo) {
         this.utilisateurs.put(pseudo, new Utilisateur(pseudo));
     }
 
+    /**
+     * Supprime un utilisateur de la base de données.
+     *
+     * @param pseudo Le pseudo de l'utilisateur à supprimer.
+     */
     public void removeUtilisateur(String pseudo) {
         this.utilisateurs.remove(pseudo);
     }
 
+    /**
+     * Supprime un utilisateur de la base de données.
+     *
+     * @param utilisateur L'objet Utilisateur à supprimer.
+     */
     public void removeUtilisateur(Utilisateur utilisateur) {
         this.utilisateurs.remove(utilisateur.getPseudo());
     }
 
+    /**
+     * Ajoute un message à la base de données.
+     *
+     * @param contenu Le contenu du message.
+     * @param auteur L'auteur du message.
+     */
     public void addMessage(String contenu, Utilisateur auteur) {
         Message newMessage = new Message(this.messages.size(), contenu, auteur);
         this.messages.put(newMessage.getId(), newMessage);
     }
 
+    /**
+     * Ajoute un message à la base de données.
+     *
+     * @param message L'objet Message à ajouter.
+     */
     public void addMessage(Message message) {
         this.messages.put(message.getId(), message);
     }
 
+    /**
+     * Supprime un message de la base de données.
+     *
+     * @param id L'identifiant du message à supprimer.
+     */
     public void deleteMessage(int id) {
         this.messages.remove(id);
     }
 
+    /**
+     * Supprime un message de la base de données.
+     *
+     * @param message L'objet Message à supprimer.
+     */
     public void deleteMessage(Message message) {
         this.messages.remove(message.getId());
     }
 
+    /**
+     * Ajoute un follower à un utilisateur.
+     *
+     * @param followed Le pseudo de l'utilisateur qui follow.
+     * @param follower Le pseudo de l'utilisateur qui se fait follow.
+     */
     public void addFollower(String followed, String follower) {
         // Ajout dans la liste des followers
         if (!this.followers.containsKey(followed)) {
@@ -196,6 +299,12 @@ public class BDServeur {
         this.follows.get(follower).add(followed);
     }
 
+    /**
+     * Supprime un follower d'un utilisateur.
+     *
+     * @param followed Le pseudo de l'utilisateur qui follow.
+     * @param follower Le pseudo de l'utilisateur qui se fait follow.
+     */
     public void delFollower(String followed, String follower) {
         // Suppression dans la liste des followers
         if (this.followers.containsKey(followed)) {
@@ -207,5 +316,4 @@ public class BDServeur {
             this.follows.get(follower).remove(followed);
         }
     }
-
 }
