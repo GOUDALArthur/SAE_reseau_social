@@ -178,7 +178,7 @@ public class ClientHandler implements Runnable {
         this.utilisateur.addMessage(messageObjet);
         for (String follower : this.bd.getFollowers().getOrDefault(this.utilisateur.getPseudo(), new HashSet<>())) {
             PrintWriter followerWriter = Serveur.getClientHandler(follower).getWriter();
-            followerWriter.println(messageObjet.getAuteur().getPseudo() + " : " + messageObjet.getContenu());
+            followerWriter.println("(" + messageObjet.getId() + ") " + messageObjet.getAuteur().getPseudo() + " : " + messageObjet.getContenu());
         }
     }
 

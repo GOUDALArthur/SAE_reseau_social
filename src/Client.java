@@ -32,7 +32,7 @@ public class Client {
                     String reponse;
                     try {
                         while ((reponse = reader.readLine()) != null) {
-                            if (reponse.equals("\n"))
+                            if (reponse.equals("\n") || reponse.startsWith("("))
                                 System.out.println(reponse);
                             else if (!reponse.equals(""))
                                 System.out.println("[SERVEUR] : " + reponse);
